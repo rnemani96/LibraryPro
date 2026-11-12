@@ -1,0 +1,30 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# PyInstaller / Build outputs
+build/
+dist/
+installer_output/
+*.exe
+*.spec.bak
+
+# SQLite Database & Local Data
+data/*.db
+data/*.db-wal
+data/*.db-shm
+*.db
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# IDE & OS files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
