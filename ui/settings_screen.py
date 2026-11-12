@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox, QComboBox
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 
 from db.schema import get_setting, set_setting
 
@@ -129,7 +130,9 @@ class SettingsScreen(QWidget):
         for r, row in enumerate(rows):
             for c, val in enumerate([row["id"], row["username"],
                                      row["full_name"] or "", row["role"]]):
-                self.users_table.setItem(r, c, QTableWidgetItem(str(val)))
+                item = QTableWidgetItem(str(val))
+                item.setForeground(QColor("#0f172a"))
+                self.users_table.setItem(r, c, item)
 
     def _add_user(self):
         if self.current_user.get("role") != "admin":
@@ -256,8 +259,12 @@ class SettingsScreen(QWidget):
         rows = self.conn.execute("SELECT * FROM holidays ORDER BY date").fetchall()
         self.holiday_table.setRowCount(len(rows))
         for r, row in enumerate(rows):
-            self.holiday_table.setItem(r, 0, QTableWidgetItem(row["date"]))
-            self.holiday_table.setItem(r, 1, QTableWidgetItem(row["description"] or ""))
+            i0 = QTableWidgetItem(row["date"])
+            i0.setForeground(QColor("#0f172a"))
+            i1 = QTableWidgetItem(row["description"] or "")
+            i1.setForeground(QColor("#0f172a"))
+            self.holiday_table.setItem(r, 0, i0)
+            self.holiday_table.setItem(r, 1, i1)
 
     def _add_holiday(self):
         d = self.holiday_date_edit.text().strip()

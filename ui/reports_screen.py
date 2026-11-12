@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QFileDialog, QMessageBox, QTabWidget, QDateEdit
 )
 from PySide6.QtCore import Qt, QDate
+from PySide6.QtGui import QColor
 
 from core.rules import get_overdue_loans, compute_live_fine
 
@@ -78,19 +79,24 @@ class ReportsScreen(QWidget):
                 total_fine += fine
                 days = (today - date.fromisoformat(loan["due_date"])).days
 
-                def cell(text, align=Qt.AlignLeft):
+                def cell(text, align=Qt.AlignLeft, bold=False):
                     item = QTableWidgetItem(str(text) if text else "")
                     item.setTextAlignment(align | Qt.AlignVCenter)
+                    item.setForeground(QColor("#0f172a"))
+                    if bold:
+                        f = item.font()
+                        f.setBold(True)
+                        item.setFont(f)
                     return item
 
-                self.overdue_table.setItem(r, 0, cell(loan["student_id"]))
+                self.overdue_table.setItem(r, 0, cell(loan["student_id"], bold=True))
                 self.overdue_table.setItem(r, 1, cell(loan["student_name"]))
                 self.overdue_table.setItem(r, 2, cell(loan["course"]))
-                self.overdue_table.setItem(r, 3, cell(loan["acc_no"]))
+                self.overdue_table.setItem(r, 3, cell(loan["acc_no"], bold=True))
                 self.overdue_table.setItem(r, 4, cell(loan["title"]))
                 self.overdue_table.setItem(r, 5, cell(loan["due_date"]))
-                fi = cell(f"₹{fine:.0f}", Qt.AlignRight)
-                fi.setForeground(Qt.red)
+                fi = cell(f"₹{fine:.0f}", Qt.AlignRight, bold=True)
+                fi.setForeground(QColor("#b91c1c"))
                 self.overdue_table.setItem(r, 6, fi)
 
             self.overdue_summary.setText(

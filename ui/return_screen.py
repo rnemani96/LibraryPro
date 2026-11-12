@@ -168,21 +168,24 @@ class ReturnScreen(QWidget):
 
         # Populate result panel
         self.book_title_lbl.setText(f"📖  {book['title']}")
+        self.book_title_lbl.setStyleSheet("color: #0f172a; font-size: 17px; font-weight: 800;")
         self.book_detail_lbl.setText(
             f"Acc No: {acc_no}  |  Author: {book['author']}  |  "
             f"Issued: {loan['issue_date']}  |  Due: {loan['due_date']}"
         )
+        self.book_detail_lbl.setStyleSheet("color: #1e293b; font-size: 13px; font-weight: 600;")
         self.borrower_lbl.setText(
-            f"Borrower: {loan['student_name']} ({loan['student_id']})  |  "
-            f"Renewals: {loan['renewals_count']}"
+            f"Borrower: {loan['student_name']} (ID: {loan['student_id']})  |  "
+            f"Renewals Done: {loan['renewals_count']}"
         )
+        self.borrower_lbl.setStyleSheet("color: #1e293b; font-size: 13px; font-weight: 700;")
 
         if fine > 0:
             self.fine_lbl.setText(f"⚠  Overdue by {days_late} working day(s)  |  Fine: ₹{fine:.0f}")
-            self.fine_lbl.setStyleSheet("color: #dc3545;")
+            self.fine_lbl.setStyleSheet("color: #b91c1c; font-size: 14px; font-weight: 800;")
         else:
             self.fine_lbl.setText("✅  No fine — book returned on time.")
-            self.fine_lbl.setStyleSheet("color: #198754;")
+            self.fine_lbl.setStyleSheet("color: #15803d; font-size: 14px; font-weight: 800;")
 
         self.result_frame.setVisible(True)
         self.status_lbl.clear()

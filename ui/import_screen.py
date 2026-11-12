@@ -76,7 +76,7 @@ class ImportScreen(QWidget):
             )
 
         hint_lbl = QLabel(hint)
-        hint_lbl.setObjectName("studentInfo")
+        hint_lbl.setStyleSheet("color: #0f172a; font-size: 13px; font-weight: 600; background-color: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;")
         hint_lbl.setWordWrap(True)
         lay.addWidget(hint_lbl)
 
@@ -114,6 +114,7 @@ class ImportScreen(QWidget):
 
         # Log box
         log_box = QTextEdit()
+        log_box.setStyleSheet("background-color: #ffffff; color: #0f172a; font-family: Consolas, monospace; font-size: 12px; font-weight: 600; border: 1.5px solid #94a3b8;")
         log_box.setReadOnly(True)
         log_box.setMaximumHeight(200)
 

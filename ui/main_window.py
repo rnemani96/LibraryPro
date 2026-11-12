@@ -43,25 +43,25 @@ class MainWindow(QMainWindow):
         # ── Sidebar ────────────────────────────────────────────────────
         sidebar = QFrame()
         sidebar.setObjectName("sidebar")
-        sidebar.setFixedWidth(210)
+        sidebar.setFixedWidth(225)
         sb_lay = QVBoxLayout(sidebar)
         sb_lay.setContentsMargins(0, 0, 0, 0)
         sb_lay.setSpacing(0)
 
         # App title
-        title_lbl = QLabel("📚  LibraryPro")
+        title_lbl = QLabel("🏛️  LibraryPro")
         title_lbl.setObjectName("appTitle")
         sb_lay.addWidget(title_lbl)
 
         role = self.current_user.get("role", "librarian").capitalize()
         user = self.current_user.get("full_name") or self.current_user.get("username", "")
-        sub_lbl = QLabel(f"{role}: {user}")
+        sub_lbl = QLabel(f"Role: {role}  |  {user}")
         sub_lbl.setObjectName("appSubtitle")
         sb_lay.addWidget(sub_lbl)
 
         # Divider
         div = QFrame()
-        div.setStyleSheet("background-color: #2d4070; min-height: 1px; max-height: 1px;")
+        div.setStyleSheet("background-color: #1e293b; min-height: 1px; max-height: 1px; margin: 4px 14px 10px 14px;")
         sb_lay.addWidget(div)
 
         # Nav buttons
@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
 
         # ── Content area ───────────────────────────────────────────────
         self.stack = QStackedWidget()
-        self.stack.setStyleSheet("background-color: #f0f4f8;")
+        self.stack.setStyleSheet("background-color: #f1f5f9;")
 
         screens = [
             DashboardScreen(self.conn, self.current_user),
@@ -126,11 +126,11 @@ class MainWindow(QMainWindow):
 
         # Status bar
         self.status_bar = QStatusBar()
-        self.status_bar.setStyleSheet("background: #1a2744; color: #c8d6e8; font-size: 11px;")
+        self.status_bar.setStyleSheet("background: #0f172a; color: #f8fafc; font-size: 12px; font-weight: 600; padding: 4px 12px; border-top: 1px solid #1e293b;")
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage(
-            f"Logged in as {self.current_user.get('username', '')}  |  "
-            f"Library Management System"
+            f"Active Session: {self.current_user.get('username', '')} ({role})  |  "
+            f"LibraryPro Institutional Management System"
         )
 
     def _switch_screen(self, index: int):

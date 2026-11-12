@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QHeaderView, QMessageBox, QDoubleSpinBox, QDialog, QDialogButtonBox, QFormLayout
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 
 from core.rules import record_fine_payment, waive_fine
 
@@ -121,23 +122,28 @@ class FinesScreen(QWidget):
 
         self.table.setRowCount(len(rows))
         for r, row in enumerate(rows):
-            def cell(text, align=Qt.AlignLeft):
+            def cell(text, align=Qt.AlignLeft, bold=False):
                 item = QTableWidgetItem(str(text) if text is not None else "")
                 item.setTextAlignment(align | Qt.AlignVCenter)
+                item.setForeground(QColor("#0f172a"))
+                if bold:
+                    f = item.font()
+                    f.setBold(True)
+                    item.setFont(f)
                 return item
 
-            self.table.setItem(r, 0, cell(str(row["id"]), Qt.AlignCenter))
-            self.table.setItem(r, 1, cell(row["student_id"]))
+            self.table.setItem(r, 0, cell(str(row["id"]), Qt.AlignCenter, bold=True))
+            self.table.setItem(r, 1, cell(row["student_id"], bold=True))
             self.table.setItem(r, 2, cell(row["student_name"]))
             self.table.setItem(r, 3, cell(row["title"]))
             self.table.setItem(r, 4, cell(str(row["days_late"]), Qt.AlignCenter))
-            self.table.setItem(r, 5, cell(f"₹{row['amount']:.0f}", Qt.AlignRight))
+            self.table.setItem(r, 5, cell(f"₹{row['amount']:.0f}", Qt.AlignRight, bold=True))
             self.table.setItem(r, 6, cell(f"₹{row['paid_amount']:.0f}", Qt.AlignRight))
-            status_item = cell(row["status"], Qt.AlignCenter)
+            status_item = cell(row["status"], Qt.AlignCenter, bold=True)
             if row["status"] == "UNPAID":
-                status_item.setForeground(Qt.red)
+                status_item.setForeground(QColor("#b91c1c"))
             elif row["status"] == "PARTIAL":
-                status_item.setForeground(Qt.darkYellow)
+                status_item.setForeground(QColor("#c2410c"))
             self.table.setItem(r, 7, status_item)
 
     def _get_selected_fine_id(self):

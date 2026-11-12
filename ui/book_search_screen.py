@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QHeaderView, QMessageBox
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QColor
 
 from core.rules import search_books, get_book_copies_info
 
@@ -134,28 +134,33 @@ class BookSearchScreen(QWidget):
         for r, row in enumerate(results):
             status = row["status"]
 
-            def cell(text, align=Qt.AlignLeft):
+            def cell(text, align=Qt.AlignLeft, bold=False):
                 item = QTableWidgetItem(str(text) if text else "—")
                 item.setTextAlignment(align | Qt.AlignVCenter)
+                item.setForeground(QColor("#0f172a"))
+                if bold:
+                    f = item.font()
+                    f.setBold(True)
+                    item.setFont(f)
                 return item
 
-            self.table.setItem(r, 0, cell(row["acc_no"]))
+            self.table.setItem(r, 0, cell(row["acc_no"], bold=True))
             self.table.setItem(r, 1, cell(row["title"]))
             self.table.setItem(r, 2, cell(row["author"]))
 
-            status_item = cell(status, Qt.AlignCenter)
+            status_item = cell(status, Qt.AlignCenter, bold=True)
             if status == "AVAILABLE":
-                status_item.setForeground(Qt.darkGreen)
+                status_item.setForeground(QColor("#15803d"))
             elif status == "ISSUED":
-                status_item.setForeground(Qt.blue)
+                status_item.setForeground(QColor("#1d4ed8"))
             else:
-                status_item.setForeground(Qt.red)
+                status_item.setForeground(QColor("#b91c1c"))
             self.table.setItem(r, 3, status_item)
 
-            self.table.setItem(r, 4, cell(row["held_by_student"] or ""))
+            self.table.setItem(r, 4, cell(row["held_by_student"] or "", bold=True))
             self.table.setItem(r, 5, cell(row["held_by_name"] or ""))
             self.table.setItem(r, 6, cell(row["issue_date"] or ""))
-            self.table.setItem(r, 7, cell(row["due_date"] or ""))
+            self.table.setItem(r, 7, cell(row["due_date"] or "", bold=True))
             self.table.setItem(r, 8, cell(row["department"] or ""))
 
     def _clear(self):

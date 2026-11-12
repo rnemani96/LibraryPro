@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QPushButton, QFrame, QTableWidget, QTableWidgetItem, QHeaderView
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 
 from core.rules import get_student
 from ui.student_panel import StudentInfoPanel
@@ -131,7 +132,9 @@ class StudentLookupScreen(QWidget):
         self.name_results_table.setRowCount(len(rows))
         for r, row in enumerate(rows):
             for c, field in enumerate(["student_id", "name", "course", "year"]):
-                self.name_results_table.setItem(r, c, QTableWidgetItem(str(row[field] or "")))
+                item = QTableWidgetItem(str(row[field] or ""))
+                item.setForeground(QColor("#0f172a"))
+                self.name_results_table.setItem(r, c, item)
         self.name_results_table.setVisible(len(rows) > 0)
         if not rows:
             self.status_lbl.setText(f"❌  No students found matching '{name}'")
