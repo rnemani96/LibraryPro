@@ -359,4 +359,5 @@ class SettingsScreen(QWidget):
         return w
 
     def on_show(self):
-        pass
+        self._load_users()
+        self._load_holidays()

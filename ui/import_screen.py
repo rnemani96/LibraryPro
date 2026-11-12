@@ -162,4 +162,5 @@ class ImportScreen(QWidget):
         return widget
 
     def on_show(self):
+        # Ready for next import
         pass

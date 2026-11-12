@@ -245,11 +245,13 @@ def return_book(conn: sqlite3.Connection, acc_no: str,
 
 
 def renew_book(conn: sqlite3.Connection, acc_no: str,
-               renewed_by: str = "librarian") -> dict:
+               renewed_by: str = "librarian",
+               fine_collected: bool = False) -> dict:
     """
     Renew an active loan by loan_days more days.
-    - If overdue, fine must be paid first (checked here).
-    - No renewal limit.
+    - If overdue, fine must be paid first.
+    - If fine_collected is True, the fine is recorded as PAID.
+    - Unlimited renewals allowed.
     """
     book = get_book(conn, acc_no)
     if not book:
@@ -264,24 +266,42 @@ def renew_book(conn: sqlite3.Connection, acc_no: str,
 
     today = date.today()
     due_date = date.fromisoformat(loan["due_date"])
+    days_late = _count_fine_days(
+        date.fromisoformat(loan["issue_date"]), today, due_date, conn
+    )
+    fine_amount = _fine_for_days(days_late, conn)
 
-    if today > due_date:
-        # Overdue: check if fine is paid
-        unpaid = get_total_unpaid_fine(conn, loan["student_id"])
-        if unpaid > 0:
-            return {
-                "ok": False,
-                "error": f"Book is overdue. Pay the outstanding fine of ₹{unpaid:.0f} before renewing."
-            }
+    if fine_amount > 0 and not fine_collected:
+        return {
+            "ok": False,
+            "requires_fine": True,
+            "fine_amount": fine_amount,
+            "days_late": days_late,
+            "error": f"Book is overdue by {days_late} working day(s). Fine of ₹{fine_amount:.0f} must be paid before renewal."
+        }
 
     loan_days = _loan_days_setting(conn)
-    new_due = due_date + timedelta(days=loan_days)
+    # If overdue and fine paid, extend from today so student gets full 15 days; otherwise from original due date
+    if today > due_date:
+        new_due = today + timedelta(days=loan_days)
+    else:
+        new_due = due_date + timedelta(days=loan_days)
 
     try:
-        conn.execute("""
+        cur = conn.cursor()
+        cur.execute("""
             UPDATE loans SET due_date=?, renewals_count=renewals_count+1
             WHERE id=?
         """, (new_due.isoformat(), loan["id"]))
+
+        if fine_amount > 0 and fine_collected:
+            cur.execute("""
+                INSERT INTO fines(loan_id, student_id, days_late, amount, paid_amount, status, paid_on)
+                VALUES(?,?,?,?,?,'PAID',?)
+            """, (loan["id"], loan["student_id"], days_late, fine_amount, fine_amount, today.isoformat()))
+            _audit(conn, renewed_by, "FINE_PAYMENT",
+                   f"Fine on renewal for loan {loan['id']}: paid ₹{fine_amount:.2f}")
+
         _audit(conn, renewed_by, "RENEW",
                f"Book {acc_no} renewed for {loan['student_id']}; new due {new_due.isoformat()}")
         conn.commit()
@@ -289,6 +309,7 @@ def renew_book(conn: sqlite3.Connection, acc_no: str,
             "ok": True,
             "new_due_date": new_due.isoformat(),
             "renewals_count": loan["renewals_count"] + 1,
+            "fine_paid": fine_amount if (fine_amount > 0 and fine_collected) else 0.0,
         }
     except Exception as e:
         conn.rollback()

@@ -129,6 +129,7 @@ class ReportsScreen(QWidget):
 
         refresh_btn.clicked.connect(load)
         export_btn.clicked.connect(export_excel)
+        self._refresh_overdue = load
         load()
         return w
 
@@ -183,6 +184,7 @@ class ReportsScreen(QWidget):
                 ]):
                     self.history_table.setItem(r, c, QTableWidgetItem(str(val)))
 
+        self._refresh_history = load
         load_btn.clicked.connect(load)
         return w
 
@@ -220,9 +222,15 @@ class ReportsScreen(QWidget):
                                          row["borrow_count"], row["active_count"]]):
                     table.setItem(r, c, QTableWidgetItem(str(val)))
 
+        self._refresh_most_borrowed = load
         load_btn.clicked.connect(load)
         load()
         return w
 
     def on_show(self):
-        pass
+        if hasattr(self, "_refresh_overdue"):
+            self._refresh_overdue()
+        if hasattr(self, "_refresh_history"):
+            self._refresh_history()
+        if hasattr(self, "_refresh_most_borrowed"):
+            self._refresh_most_borrowed()

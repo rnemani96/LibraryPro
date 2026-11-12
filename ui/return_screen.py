@@ -242,16 +242,37 @@ class ReturnScreen(QWidget):
             self.conn, acc_no,
             renewed_by=self.current_user.get("username", "librarian")
         )
-        if result["ok"]:
-            self.status_lbl.setText(
-                f"✅  Book renewed!  New due date: {result['new_due_date']}  "
-                f"(Renewal #{result['renewals_count']})"
+        if not result["ok"] and result.get("requires_fine"):
+            fine_due = result["fine_amount"]
+            days = result["days_late"]
+            reply = QMessageBox.question(
+                self, "Collect Overdue Fine for Renewal",
+                f"This book is overdue by {days} working day(s).\n\n"
+                f"Outstanding Overdue Fine: ₹{fine_due:.0f}\n\n"
+                f"Collect ₹{fine_due:.0f} now and renew book for +15 days?",
+                QMessageBox.Yes | QMessageBox.No
             )
-            self.status_lbl.setStyleSheet("color: #198754; font-weight: bold;")
+            if reply == QMessageBox.Yes:
+                result = renew_book(
+                    self.conn, acc_no,
+                    renewed_by=self.current_user.get("username", "librarian"),
+                    fine_collected=True
+                )
+            else:
+                self.status_lbl.setText("❌ Renewal cancelled — overdue fine was not paid.")
+                self.status_lbl.setStyleSheet("color: #b91c1c; font-weight: bold;")
+                return
+
+        if result["ok"]:
+            msg = f"✅  Book renewed!  New due date: {result['new_due_date']}  (Renewal #{result['renewals_count']})"
+            if result.get("fine_paid", 0) > 0:
+                msg += f"\n💰 Overdue fine of ₹{result['fine_paid']:.0f} collected and marked PAID."
+            self.status_lbl.setText(msg)
+            self.status_lbl.setStyleSheet("color: #15803d; font-weight: bold;")
             self._clear()
         else:
             self.status_lbl.setText(f"❌  {result['error']}")
-            self.status_lbl.setStyleSheet("color: #dc3545; font-weight: bold;")
+            self.status_lbl.setStyleSheet("color: #b91c1c; font-weight: bold;")
 
     def _clear(self):
         self._pending_return = None
